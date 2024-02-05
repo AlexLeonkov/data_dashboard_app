@@ -1,40 +1,84 @@
 import { Button } from "antd";
 import "./App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchTheData = () => {
-    fetch("http://127.0.0.1:8080")
+    setLoading(true);
+    setError('');
+    fetch("http://127.0.0.1:8080/table-info")
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error(`Network response was not ok: ${response.statusText}`);
         }
-        return response.text();
+        return response.json();
       })
       .then((data) => {
-        console.log("Data received from server:", data);
-        // Handle your data here
-
         setData(data);
       })
       .catch((error) => {
-        console.error(
-          "There has been a problem with your fetch operation:",
-          error
-        );
+        setError(`Failed to load data: ${error.message}`);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
+
+  const downloadDatabase = () => {
+    fetch("http://127.0.0.1:8080/download-database", {
+      method: "GET",
+      responseType: "blob", // Set the response type to blob
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        // Create a URL for the blob data
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a link element and trigger a click to download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "telemetry.db"; // Specify the filename
+        a.click();
+        window.URL.revokeObjectURL(url); // Release the object URL
+      })
+      .catch((error) => {
+        setError(`Failed to download database: ${error.message}`);
+      });
+  };
+
+  useEffect(() => {
+    fetchTheData();
+  }, []); // Fetch data on component mount
+
   return (
     <div className="App">
       <h2>Heimdall App</h2>
-
-      <Button onClick={fetchTheData} className="btn">
-        Load new data
+      <Button onClick={fetchTheData} className="btn" disabled={loading}>
+        {loading ? 'Loading...' : 'Load new data'}
       </Button>
 
-      {data ? <div className="result">{data}</div> : <></>}
+      <Button onClick={downloadDatabase} className="btn">
+        Download Database
+      </Button>
+
+      {error && <div className="error">{error}</div>}
+      <div className="data-container">
+        {Object.entries(data).map(([key, value]) => (
+          <div key={key} className="data-box">
+            <div className="data-title">{key.replace(/Count$/, '')}</div>
+            <div className="data-value">{value}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

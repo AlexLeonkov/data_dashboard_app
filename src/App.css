@@ -1,13 +1,24 @@
-h2{
+.data-container {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+}
+
+.data-box {
+  border: 2px solid #1890ff;
+  border-radius: 5px;
+  padding: 10px;
   text-align: center;
 }
 
-.btn{
-  display: block; /* Buttons are inline by default, this changes it to a block-level element */
-  margin: 0 auto;
+.data-title {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
 }
 
-.result{
- text-align: center;
- margin-top: 10px;
+.data-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1890ff;
 }
