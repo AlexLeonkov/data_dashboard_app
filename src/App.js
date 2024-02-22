@@ -7,6 +7,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+
+  //fetch the data from the server
   const fetchTheData = () => {
     setLoading(true);
     setError('');
@@ -28,6 +30,7 @@ function App() {
       });
   };
 
+  //download database from the server
   const downloadDatabase = () => {
     fetch("http://127.0.0.1:8080/download-database", {
       method: "GET",
